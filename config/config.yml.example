@@ -1,0 +1,5 @@
+host: localhost
+url: "http://www.eol.org"
+browser: "*firefox"
+curator: curator
+curator_password: curator_pass
