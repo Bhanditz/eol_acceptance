@@ -12,27 +12,7 @@ def top_images_diff(page)
   [img1, img2]
 end
 
-describe "User without login" do
-  attr_reader :selenium_driver
-  alias :page :selenium_driver
-
-  before(:all) do
-    @selenium_driver = Selenium::Client::Driver.new \
-        :host => Conf.host, 
-        :port => 4444, 
-        :browser => Conf.browser, 
-        :url => Conf.url,
-        :timeout_in_second => 60
-  end
-  
-  before(:each) do
-    selenium_driver.start_new_browser_session
-  end
-  
-  # The system capture need to happen BEFORE closing the Selenium session 
-  append_after(:each) do    
-    @selenium_driver.close_current_browser_session
-  end
+describe "Home page without login" do
 
   it "should show home page" do
     page.open "/"
