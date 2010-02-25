@@ -12,6 +12,16 @@ describe "Species page without login" do
     page.title.should match(/- Encyclopedia of Life/)
     page.body_text.should match(/explore/i)
     dom.xpath("//table[@id='related-species-table']//img").size.should == 5 
+    #it should show "Species recognized by" in header.
+    page.text("xpath=//div[@id='page-title']").should match(/Species recognized by/)
+    #it should show Scientific Name as H1, Common Name as H2. TODO: Can we check them interactively?
+    dom.xpath("//div[@id='page-title']//h1").first.text.strip.should_not == ''
+    dom.xpath("//div[@id='page-title']//h2").first.text.strip.should_not == ''
+    #it should show IUCN status
+    page.text("xpath=//span[@class='iucn-status']").should match(/IUCN Red List Status:/i)
+    page.text("xpath=//span[@class='iucn-status-value']").should match(/not evaluated/i) #TODO all possible variants should be here
   end
+
+
 
 end
