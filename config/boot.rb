@@ -4,7 +4,8 @@ require 'pp'
 require 'yaml'
 require 'ruby-debug'
 class Conf
-  @data = YAML.load(open(File.join(File.dirname(__FILE__), "config.yml")).read)
+  #@data = YAML.load(open(File.join(File.dirname(__FILE__), "config.yml")).read)
+  @data = {}
   @data.merge!(YAML.load(open(File.join(File.dirname(__FILE__), "config_private.yml")).read))
   def self.method_missing(method, *args, &block)
     @data[method.to_s]
