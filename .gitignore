@@ -1,3 +1,5 @@
 /config/*yml
 *.swp
 *.swo
+*DS_Store
+/tmp*

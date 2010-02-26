@@ -1,4 +1,5 @@
 --colour
---format specdoc
 --loadby mtime
 --reverse
+--format=Selenium::RSpec::SeleniumTestReportFormatter:./tmp/acceptance_tests_report.html
+--format specdoc
