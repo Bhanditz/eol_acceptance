@@ -19,7 +19,12 @@ describe "Species page without login" do
     dom.xpath("//div[@id='page-title']//h2").first.text.strip.should_not == ''
     #it should show IUCN status
     page.text("xpath=//span[@class='iucn-status']").should match(/IUCN Red List Status:/i)
-    page.text("xpath=//span[@class='iucn-status-value']").should match(/not evaluated/i) #TODO all possible variants should be here
+    page.text("xpath=//span[@class='iucn-status-value']").strip.should_not == ""
+  end
+
+  it "should show IUCN status 'vulnerable' for cheetah's page" do
+    page.open Conf.cheetah_page
+    page.text("xpath=//span[@class='iucn-status-value']").should match(/vulnerable/i)
   end
 
 
