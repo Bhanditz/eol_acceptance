@@ -56,11 +56,19 @@ describe "Species page without login" do
     big_img_src1.should_not == big_img_src2
     #NOTE we assume that atribution of two pictures is different, which might not always be the case
     attribution1.should_not == attribution2
-    # page.click("xpath=.//*[@id='large-image-attribution-button-popup-link']/span")
-    # sleep(10)
-    # dom = Nokogiri.HTML(page.get_html_source)
-    # attr_popup = dom.xpath(".//*[@id='large-image-attribution-button-popup-link_popup']")
-    # puts "something", attr_popup
+    #this code does not work in Safari yet unfortunatelly :-(
+    if Conf.browser == "*firefox"
+      page.click("xpath=.//*[@id='large-image-attribution-button-popup-link']/span", :wait_for => :ajax)
+      dom = Nokogiri.HTML(page.get_html_source)
+      attr_popup = dom.xpath(".//*[@id='large-image-attribution-button-popup-link_popup']")
+      attribution1 = attr_popup.text
+      page.click("xpath=id('thumbnails')/descendant::img[contains(@src,'_small.jpg')][1]", :wait_for => :ajax)
+      page.click("xpath=.//*[@id='large-image-attribution-button-popup-link']/span", :wait_for => :ajax)
+      dom = Nokogiri.HTML(page.get_html_source)
+      attr_popup = dom.xpath(".//*[@id='large-image-attribution-button-popup-link_popup']")
+      attribution2 = attr_popup.text
+      attribution1.should_not == attribution2
+    end
   end
 
 
