@@ -2,6 +2,7 @@ require 'rubygems'
 require 'nokogiri'
 require 'pp'
 require 'yaml'
+require 'set'
 require 'ruby-debug'
 class Conf
   @data = YAML.load(open(File.join(File.dirname(__FILE__), "config.yml")).read)

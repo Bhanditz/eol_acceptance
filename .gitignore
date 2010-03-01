@@ -1,4 +1,4 @@
-/config/*yml
+/config/config_private.yml
 *.swp
 *.swo
 *DS_Store
