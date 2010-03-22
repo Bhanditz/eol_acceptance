@@ -25,6 +25,10 @@ Spec::Runner.configure do |config|
       :browser => Conf.browser, 
       :url => Conf.url,
       :timeout_in_second => 60
+    def @selenium_driver.dom(options = {})
+      return @page_dom = Nokogiri::HTML(self.get_html_source) if options[:reload]
+      @page_dom ||= Nokogiri::HTML(self.get_html_source)
+    end
   end
   
   def start_new_browser_session
@@ -36,5 +40,6 @@ Spec::Runner.configure do |config|
     @selenium_driver
   end
   alias :page :selenium_driver
+
 end
 
