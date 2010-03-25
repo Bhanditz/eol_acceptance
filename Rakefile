@@ -6,7 +6,7 @@ require 'selenium/rake/tasks'
 
 task :default => :spec
 
-Spec::Rake::SpecTask.new(:spec => 'selenium:start') do |t|
+Spec::Rake::SpecTask.new do |t|
   t.spec_opts = ['--options', "\"#{File.dirname(__FILE__)}/spec/spec.opts\""]
   #Spec::Rake::Task['selenium:stop'].invoke
 end
