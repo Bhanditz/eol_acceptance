@@ -150,4 +150,34 @@ describe "Species page without login" do
     end
   end
 
+  describe "Search" do 
+    it "should not change anyting if nothing entered to search box" do
+      page.open "/"
+      html_original = page.get_html_source
+      page.click("search_image")
+      sleep 4
+      page.get_html_source.should == html_original
+
+      page.type "q", "tiger"
+      page.click("search_image")
+      sleep 4
+      page.get_html_source.should_not == html_original
+    end
+    
+    it "should keep type of a search (text, tag, full text) selected after the search is done" do
+      page.open "/"
+      page.type "q", "tiger"
+      page.click "search_type_tag"
+      page.checked?("search_type_tag").should be_true
+      page.click "search_image", :wait_for => :page
+      page.checked?("search_type_tag").should be_true
+      page.click "search_type_text"
+      page.checked?("search_type_text").should be_true
+      page.click "search_image", :wait_for => :page
+      page.checked?("search_type_text").should be_true
+    end
+
+
+  end
+
 end
