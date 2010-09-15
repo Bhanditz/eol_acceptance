@@ -24,7 +24,7 @@ describe "Species page without login" do
     page.element?("xpath=//div[@id='media-images']//div[@id='large-image']//img[@id='main-image']").should be_true
     page.element?("xpath=//div[@id='image-thumbnails']//div[@id='image-collection']//div[@id='thumbnails']").should be_true
   end
-
+  
   it "should show IUCN status 'vulnerable' for cheetah's page" do
     page.open Conf.cheetah_page
     page.text("xpath=//span[@class='iucn-status-value']").should match(/vulnerable/i)
@@ -43,7 +43,7 @@ describe "Species page without login" do
     img_src2.size.should > 0
     img_src1.to_set.intersection(img_src2.to_set).size.should == 0
   end
-
+  
   it "should change images when somebody clicks on thumbnails" do
     page.open Conf.corn_page
     dom = Nokogiri.HTML(page.get_html_source)
@@ -101,7 +101,7 @@ describe "Species page without login" do
     common_names.should match /English/
     common_names.should match /Arabic/
     #check that Specialist Project page exists
-    page.click("link=Specialist Projects", :wait_for => :ajax)
+    page.click("xpath=(//a[@title='Content Partners'])[last()]", :wait_for => :ajax)
     page.dom(:reload => true).xpath(".//div[@id='center-page-content']//img").size.should > 4
     #check for a bunch of references
     page.click("link=Literature References", :wait_for => :ajax)
@@ -113,14 +113,14 @@ describe "Species page without login" do
     iframe.size.should == 1
     iframe[0].attributes["src"].value.should match /ubio/i
   end
-
+  
   it "should open pages from menus" do
     # This just ensures that the page-does-not-exists follows our expected format.
     page.open "http://staging.eol.org/adfgsdf/sdfgdfg"
     page.dom(:reload => true).xpath(".//*[@id='page-title']/h1").inner_text.should match(/page.*?not exist/)
     page.open "http://staging.eol.org/adfgsdf"
     page.dom(:reload => true).xpath(".//*[@id='page-title']/h1").inner_text.should match(/Search Results/)
-
+    
     page.open Conf.corn_page
     dom = page.dom(:reload => true)
     skipped_links = []
@@ -150,35 +150,165 @@ describe "Species page without login" do
       page.dom(:reload => true).xpath(".//*[@id='page-title']/h1").inner_text.should_not match(/Search Results/)
     end
   end
-
+  
+  
+  
+  it 'should be able to toggle between scientific and vernacular names' do
+    page.open Conf.corn_page
+    dom = get_dom(page)
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Animalia']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Plantae']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Magnoliophyta']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Liliopsida']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Poales']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Poaceae']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Zea']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Zea mays L.']").size.should == 1
+    dom.xpath("//h1/i[.='Zea mays']").size.should == 1
+    dom.xpath("//h2/i[.='Corn']").size.should == 1
+    page.body_text.should match(/Scientific names/i)
+    page.click("xpath=//a[@title='click to show common names']", :wait_for => :page)
+    page.dom(:reload => true)
+    dom = get_dom(page)
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Animals']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Plants']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Flowering plants']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Monocotyledons']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Poales']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Grasses']").size.should == 1
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Corn']").size.should == 4
+    dom.xpath("//h1/i[.='Zea mays']").size.should == 1
+    dom.xpath("//h2/i[.='Corn']").size.should == 1
+    page.body_text.should match(/Common names/i)
+  end
+  
+  it 'should require users to be logged in to add comments' do
+    page.open Conf.corn_page
+    page.click("xpath=.//a[@id='large-image-comment-button-popup-link']", :wait_for => :ajax)
+    page.dom(:reload => true)
+    page.body_text.should match(/You must be logged in to post comments/i)
+  end
+  
+  it 'should require users to be logged in to add tags' do
+    page.open Conf.corn_page
+    page.click("xpath=.//a[@id='large-image-tagging-button-popup-link']", :wait_for => :ajax)
+    page.dom(:reload => true)
+    page.body_text.should match(/You must be logged in to add your own tags/i)
+  end
+  
   describe "Search" do 
     it "should not change anyting if nothing entered to search box" do
       page.open "/"
       html_original = page.dom(:reload => true).xpath(".//div[@id='content']").inner_html
       page.click("search_image")
-      sleep 4
+      sleep 2
       page.dom(:reload => true).xpath(".//div[@id='content']").inner_html == html_original
-
+      
       page.type "q", "tiger"
       page.click("search_image")
-      sleep 4
+      sleep 2
       page.get_html_source.should_not == html_original
     end
     
     it "should keep type of a search (text, tag, full text) selected after the search is done" do
       page.open "/"
-      page.type "q", "tiger"
+      page.type "q", "blue"
       page.click "search_type_tag"
       page.checked?("search_type_tag").should be_true
       page.click "search_image", :wait_for => :page
       page.checked?("search_type_tag").should be_true
+      page.dom(:reload => true).xpath("//input[@id='q']/@value").text.should == "blue"
       page.click "search_type_text"
       page.checked?("search_type_text").should be_true
       page.click "search_image", :wait_for => :page
       page.checked?("search_type_text").should be_true
+      page.dom(:reload => true).xpath("//input[@id='q']/@value").text.should == "blue"
     end
-
-
+    
+    it "should return suggested search results and page big searches" do
+      page.open "/"
+      page.type "q", "tiger"
+      page.click "search_type_text"
+      page.click "search_image", :wait_for => :page
+      page.body_text.should match(/Suggested search results/i)
+      dom = page.dom(:reload => true)
+      dom.xpath("//table[@summary='Suggested Search Results']//i[.='Panthera tigris']").size.should == 1
+      dom.xpath("//table[@summary='Common Names Search Results']//tr").size.should == 11
+      dom.xpath("//table[@summary='Common Names Search Results']//a").size.should > 11
+      dom.xpath("//table[@summary='Common Names Search Results']//img").size.should > 0
+      dom.xpath("//table[@summary='Scientific Names Search Results']//tr").size.should == 11
+      page.click("xpath=(//a[@rel='next' and @class='next_page'])[1]", :wait_for => :page)
+      dom = page.dom(:reload => true)
+      dom.xpath("//table[@summary='Common Names Search Results']//tr").size.should == 11
+      dom.xpath("//table[@summary='Common Names Search Results']//a").size.should > 11
+      dom.xpath("//table[@summary='Common Names Search Results']//img").size.should > 0
+      dom.xpath("//table[@summary='Scientific Names Search Results']//tr").size.should == 11
+    end
+    
+    it "should redirect exact matches to a species page" do
+      page.open "/"
+      page.type "q", "Cafeteria roenbergensis"
+      page.click "search_type_text"
+      page.click "search_image", :wait_for => :page
+      page.body_text.should match(/Cafeteria roenbergensis Fenchel & D. J. Patterson/i)
+      page.body_text.should match(/Table of contents/i)
+      page.body_text.should match(/Overview/i)
+      page.body_text.should match(/Add new content/i)
+    end
+    
+    it "should allow : in search terms" do
+      page.open "/"
+      page.type "q", "rac:coon"
+      page.click "search_type_text"
+      page.click "search_image", :wait_for => :page
+      page.body_text.should match(/Sorry, there is no result for "rac:coon" with a colon. See result for "raccoon"./i)
+      dom = page.dom(:reload => true)
+      dom.xpath("//table[@summary='Suggested Search Results']//i[.='Procyon lotor']").size.should == 1
+      dom.xpath("//table[@summary='Common Names Search Results']//tr").size.should == 11
+    end
+    
+    it "should find results for tag searches" do
+      page.open "/"
+      page.type "q", "blue"
+      page.click "search_type_tag"
+      page.click "search_image", :wait_for => :page
+      dom = page.dom(:reload => true)
+      dom.xpath("//table[@summary='Scientific Names Search Results']//tr").size.should >= 5
+      dom.xpath("//table[@summary='Scientific Names Search Results']//a[.='Deep Blue Chromis']").size.should == 1
+      dom.xpath("//table[@summary='Scientific Names Search Results']//i[.='Chromis abyssus']").size.should == 1
+      dom.xpath("//table[@summary='Scientific Names Search Results']//a[.='Blue chromis']").size.should == 1
+      dom.xpath("//table[@summary='Scientific Names Search Results']//i[.='Chromis cyanea']").size.should == 1
+      dom.xpath("//table[@summary='Scientific Names Search Results']//i[.='Halcyon smyrnensis fusca']").size.should == 1
+    end
+    
+    it "should find results for tag search of video" do
+      page.open "/"
+      page.type "q", "video"
+      page.click "search_type_tag"
+      page.click "search_image", :wait_for => :page
+      dom = page.dom(:reload => true)
+      dom.xpath("//table[@summary='Scientific Names Search Results']//tr").size.should >= 10
+      last_name = 'Aaaaaaaaaaaaaaaaaa'
+      dom.xpath("//table[@summary='Scientific Names Search Results']//tr").each_with_index do |row, index|
+        next if index == 0
+        this_name = row.xpath(".//i").text
+        (this_name <=> last_name).should >= 0
+        last_name = this_name
+      end
+    end
   end
-
+  
+  describe "Accounts" do
+    it "should create an account" do
+      page.open "/register"
+      page.type "user_username", "jrice"
+      page.body_text.should_not match(/jrice is already taken/i)
+      page.focus "user_entered_password"
+      page.dom(:reload => true)
+      page.body_text.should match(/jrice is already taken/i)
+      # page.body_text.should_not match(/show clade browser/i)
+      # page.click "curator_request", :wait_for => :ajax
+      # pp get_dom(page)
+    end
+  end
 end

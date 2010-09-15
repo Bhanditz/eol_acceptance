@@ -40,12 +40,13 @@ describe "Home page without login" do
     img1.should_not == img2
   end
 
-  it "should stop ajax change random taxa on demand" do
-    page.open "/"
-    page.click("css=img#play-button")
-    sleep(2)
-    img1, img2 = top_images_diff(page)
-    img1.should == img2
-  end
+  # # This test has been deprecated
+  # it "should stop ajax change random taxa on demand" do
+  #   page.open "/"
+  #   page.click("css=img#play-button")
+  #   sleep(2)
+  #   img1, img2 = top_images_diff(page)
+  #   img1.should == img2
+  # end
   
 end

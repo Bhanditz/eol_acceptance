@@ -1,0 +1,25 @@
+== REQUIREMENTS
+
+You'll need at least the following gems:
+rspec
+selenium-client
+
+== SETUP
+
+You first need to copy /config/config_private.yml.example to /config/config_private.yml and change:
+url => the root of the EOL Website instance you are testing. This could be www.eol.org or localhost:3000. If you are testing localhost then you must be running in staging or integration (preferable) mode in order to have access to production-like data
+browser => which browser will Selenium use for testing. Currently there are limitations based on your operating system. Mac OS X => Safari; Linux => Firefox.
+curator => the username of the curator to be used in testing
+curator_password => the password of the above curator user account
+
+== TESTING
+
+To start the selenium client you need to run:
+rake selenium:start
+
+The selenium log is written to the console, so it is recommended to start the selenium client in a separate console window.
+Open another console and run:
+rake
+
+When finished, the selenium client can be stopped by running:
+rake selenium:stop

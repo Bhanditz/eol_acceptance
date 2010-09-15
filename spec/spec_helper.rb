@@ -40,6 +40,11 @@ Spec::Runner.configure do |config|
     @selenium_driver
   end
   alias :page :selenium_driver
+  
+  def get_dom(open_page)
+    open_page.dom(:reload => true)
+    Nokogiri.HTML(open_page.get_html_source)
+  end
 
 end
 
