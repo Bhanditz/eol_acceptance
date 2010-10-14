@@ -176,7 +176,7 @@ describe "Species page without login" do
     dom.xpath("//ul[@id='taxonomictext']//a[.='Monocotyledons']").size.should == 1
     dom.xpath("//ul[@id='taxonomictext']//a[.='Poales']").size.should == 1
     dom.xpath("//ul[@id='taxonomictext']//a[.='Grasses']").size.should == 1
-    dom.xpath("//ul[@id='taxonomictext']//a[.='Corn']").size.should == 4
+    dom.xpath("//ul[@id='taxonomictext']//a[.='Corn']").size.should > 1
     dom.xpath("//h1/i[.='Zea mays']").size.should == 1
     dom.xpath("//h2/i[.='Corn']").size.should == 1
     page.body_text.should match(/Common names/i)
@@ -184,20 +184,22 @@ describe "Species page without login" do
   
   it 'should require users to be logged in to add comments' do
     page.open Conf.corn_page
-    page.click("xpath=.//a[@id='large-image-comment-button-popup-link']", :wait_for => :ajax)
+    page.body_text.should_not match(/You must be logged in to post comments/i)
+    page.click("large-image-comment-button-popup-link")
     page.dom(:reload => true)
     page.body_text.should match(/You must be logged in to post comments/i)
   end
   
   it 'should require users to be logged in to add tags' do
     page.open Conf.corn_page
-    page.click("xpath=.//a[@id='large-image-tagging-button-popup-link']", :wait_for => :ajax)
+    page.body_text.should_not match(/You must be logged in to add your own tags/i)
+    page.click("large-image-tagging-button-popup-link")
     page.dom(:reload => true)
     page.body_text.should match(/You must be logged in to add your own tags/i)
   end
   
   describe "Search" do 
-    it "should not change anyting if nothing entered to search box" do
+    it "should not change anything if nothing entered to search box" do
       page.open "/"
       html_original = page.dom(:reload => true).xpath(".//div[@id='content']").inner_html
       page.click("search_image")
@@ -288,12 +290,15 @@ describe "Species page without login" do
       page.click "search_image", :wait_for => :page
       dom = page.dom(:reload => true)
       dom.xpath("//table[@summary='Scientific Names Search Results']//tr").size.should >= 10
-      last_name = 'Aaaaaaaaaaaaaaaaaa'
+      #names should be sorted alphabetically
+      prev_name = 'Aaaaaaaaaaaaaaaaaa'
       dom.xpath("//table[@summary='Scientific Names Search Results']//tr").each_with_index do |row, index|
         next if index == 0
         this_name = row.xpath(".//i").text
-        (this_name <=> last_name).should >= 0
-        last_name = this_name
+        #TODO skipping non italisized names for now, could be a bad idea? 
+        next if !this_name || this_name.empty?
+        (this_name > prev_name).should be_true
+        prev_name = this_name
       end
     end
   end
