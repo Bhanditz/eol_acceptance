@@ -7,7 +7,7 @@ describe "Species page without login" do
     #should have login
     page.text("xpath=//a[@href='/login']").should == 'login'
     page.click("//table[@id='featured-species-table'][1]//a[starts-with(@href, '/pages')]", :wait_for => :page)
-    dom = Nokogiri.HTML(page.get_html_source)
+    dom = page.dom(:reload => true)
     #it should show Random Taxa in lower-right.
     page.title.should match(/- Encyclopedia of Life/)
     page.body_text.should match(/explore/i)
@@ -16,12 +16,12 @@ describe "Species page without login" do
     page.text("xpath=//div[@id='page-title']").should match(/Species recognized by/)
     #it should show Scientific Name as H1, Common Name as H2. TODO: Can we check them interactively?
     dom.xpath("//div[@id='page-title']//h1").first.text.strip.should_not == ''
-    dom.xpath("//div[@id='page-title']//h2").first.text.strip.should_not == ''
+    page.element?("xpath=//div[@id='page-title']//h2").should be_true
     #it should show IUCN status
     page.text("xpath=//span[@class='iucn-status']").should match(/IUCN Red List Status:/i)
     page.text("xpath=//span[@class='iucn-status-value']").strip.should_not == ""
     #is should have large image on the left, other thumbnail images show up in the middle.
-    page.element?("xpath=//div[@id='media-images']//div[@id='large-image']//img[@id='main-image']").should be_true
+    page.element?("xpath=//div[@id='media-images']//div[@id='large-image']//img[@class='main-image']").should be_true
     page.element?("xpath=//div[@id='image-thumbnails']//div[@id='image-collection']//div[@id='thumbnails']").should be_true
   end
   
@@ -32,14 +32,15 @@ describe "Species page without login" do
   
   it "should paginate through thumbnail images on the page" do
     page.open Conf.corn_page
-    dom = Nokogiri.HTML(page.get_html_source)
+    dom = page.dom(:reload => true)
     page.element?("xpath=//div[@id='image-thumbnails']//div[@id='image-collection']//div[@id='thumbnails']").should be_true
-    img_src1 = dom.xpath("//*[starts-with(@id, 'thumbnail_')]/span/img").map {|i| i.attr("src")}
+    img_src1 = dom.xpath("//*[@id='thumbnails']/a/span/img").map {|i| i.attr("src")}
     img_src1.size.should == 9
     page.click("next", :wait_for => :ajax)
-    dom = Nokogiri.HTML(page.get_html_source)
+    sleep 1
+    dom = page.dom(:reload => true)
     page.element?("xpath=//div[@id='image-thumbnails']//div[@id='image-collection']//div[@id='thumbnails']").should be_true
-    img_src2 = dom.xpath("//*[starts-with(@id, 'thumbnail_')]/span/img").map {|i| i.attr("src")}
+    img_src2 = dom.xpath("//*[@id='thumbnails']/a/span/img").map {|i| i.attr("src")}
     img_src2.size.should > 0
     img_src1.to_set.intersection(img_src2.to_set).size.should == 0
   end
