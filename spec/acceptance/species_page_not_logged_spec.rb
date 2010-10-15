@@ -36,8 +36,7 @@ describe "Species page without login" do
     page.element?("xpath=//div[@id='image-thumbnails']//div[@id='image-collection']//div[@id='thumbnails']").should be_true
     img_src1 = dom.xpath("//*[@id='thumbnails']/a/span/img").map {|i| i.attr("src")}
     img_src1.size.should == 9
-    page.click("next", :wait_for => :ajax)
-    sleep 1
+    page.click("next", :wait_for => :ajax, :javascript_framework => :jquery)
     dom = page.dom(:reload => true)
     page.element?("xpath=//div[@id='image-thumbnails']//div[@id='image-collection']//div[@id='thumbnails']").should be_true
     img_src2 = dom.xpath("//*[@id='thumbnails']/a/span/img").map {|i| i.attr("src")}
@@ -47,25 +46,25 @@ describe "Species page without login" do
   
   it "should change images when somebody clicks on thumbnails" do
     page.open Conf.corn_page
-    dom = Nokogiri.HTML(page.get_html_source)
-    big_img_src1 = dom.xpath(".//*[@id='main-image']").attr("src")
-    attribution1 = dom.xpath("//*[@id='field-notes']").text
-    page.click("xpath=id('thumbnails')/descendant::img[contains(@src,'_small.jpg')][3]", :wait_for => :ajax)
-    dom = Nokogiri.HTML(page.get_html_source)
-    big_img_src2 = dom.xpath(".//*[@id='main-image']").attr("src")
-    attribution2= dom.xpath("//*[@id='field-notes']").text
+    dom = page.dom(:reload => true)
+    big_img_src1 = dom.xpath("//div[@id='large-image']/div[contains(@style,'block')]//img").attr("src").value
+    attribution1 = dom.xpath("//*[@id='notes-container']/div[contains(@style,'block')]").text
+    page.click("xpath=id('thumbnails')/descendant::img[contains(@src,'_small.jpg')][3]", :wait_for => :ajax, :javascript_framework => :jquery)
+    dom = page.dom(:reload => true)
+    big_img_src2 = dom.xpath("//div[@id='large-image']/div[contains(@style,'block')]//img").attr("src").value
+    attribution2= dom.xpath("//*[@id='notes-container']/div[contains(@style,'block')]").text
     big_img_src1.should_not == big_img_src2
     #NOTE we assume that atribution of two pictures is different, which might not always be the case
     attribution1.should_not == attribution2
     # this code does not work in Safari yet unfortunatelly
     # We do have to check such things by hand for now 
     # if Conf.browser == "*firefox"
-    #   page.click("xpath=.//*[@id='large-image-attribution-button-popup-link']/span", :wait_for => :ajax)
+    #   page.click("xpath=.//*[@id='large-image-attribution-button-popup-link']/span", :wait_for => :ajax, :javascript_framework => :jquery)
     #   dom = Nokogiri.HTML(page.get_html_source)
     #   attr_popup = dom.xpath(".//*[@id='large-image-attribution-button-popup-link_popup']")
     #   attribution1 = attr_popup.text
-    #   page.click("xpath=id('thumbnails')/descendant::img[contains(@src,'_small.jpg')][1]", :wait_for => :ajax)
-    #   page.click("xpath=.//*[@id='large-image-attribution-button-popup-link']/span", :wait_for => :ajax)
+    #   page.click("xpath=id('thumbnails')/descendant::img[contains(@src,'_small.jpg')][1]", :wait_for => :ajax, :javascript_framework => :jquery)
+    #   page.click("xpath=.//*[@id='large-image-attribution-button-popup-link']/span", :wait_for => :ajax, :javascript_framework => :jquery)
     #   dom = Nokogiri.HTML(page.get_html_source)
     #   attr_popup = dom.xpath(".//*[@id='large-image-attribution-button-popup-link_popup']")
     #   attribution2 = attr_popup.text
@@ -86,30 +85,30 @@ describe "Species page without login" do
     inactive_link_id.should match(re_category_id)
     center_header = page.dom.xpath(".//*[@id='center-page-content']/div[1]/h3").inner_text
     central_content = page.dom.xpath(".//*[@id='center-page-content']").inner_text
-    page.click(inactive_link_id, :wait_for => :ajax)
+    page.click(inactive_link_id, :wait_for => :ajax, :javascript_framework => :jquery)
     page.dom(:reload => true).xpath(".//*[@id='#{inactive_link_id}']")[0].attributes["class"].value.should match(/active/)
     page.dom.xpath(".//*[@id='#{active_link_id}']")[0].attributes["class"].value.should_not match(/active/)
     page.dom.xpath(".//*[@id='center-page-content']").inner_text.should_not == central_content
     new_center_header = page.dom.xpath(".//*[@id='center-page-content']/div[1]/h3").inner_text
     new_center_header.should_not == center_header
     #check that BHL exists
-    page.click("link=Biodiversity Heritage Library", :wait_for => :ajax)
+    page.click("link=Biodiversity Heritage Library", :wait_for => :ajax, :javascript_framework => :jquery)
     page.dom(:reload => true).xpath(".//div[@id='center-page-content']//th")[0].inner_text.strip.should == 'BHL Summary'
     #check that Common name page exists
-    page.click("link=Common Names", :wait_for => :ajax)
+    page.click("link=Common Names", :wait_for => :ajax, :javascript_framework => :jquery)
     page.dom(:reload => true).xpath(".//*[@id='common_names_wrapper']//div[@class='title']").size.should > 0
     common_names = page.text('common_names_wrapper')
     common_names.should match /English/
     common_names.should match /Arabic/
-    #check that Specialist Project page exists
-    page.click("xpath=(//a[@title='Content Partners'])[last()]", :wait_for => :ajax)
+    #check that Content Partners page exists
+    page.click("xpath=//*[@id='toc']//*[text()='Content Partners']", :wait_for => :ajax, :javascript_framework => :jquery)
     page.dom(:reload => true).xpath(".//div[@id='center-page-content']//img").size.should > 4
     #check for a bunch of references
-    page.click("link=Literature References", :wait_for => :ajax)
+    page.click("link=Literature References", :wait_for => :ajax, :javascript_framework => :jquery)
     page.dom(:reload => true).xpath(".//div[@id='center-page-content']").inner_text.should match /References/i
     page.dom(:reload => true).xpath(".//div[@id='center-page-content']//tr").size.should > 2
     #check for Biomedical Terms
-    page.click("link=Biomedical Terms", :wait_for => :ajax)
+    page.click("link=Biomedical Terms", :wait_for => :ajax, :javascript_framework => :jquery)
     iframe = page.dom(:reload => true).xpath(".//div[@id='center-page-content']//iframe")
     iframe.size.should == 1
     iframe[0].attributes["src"].value.should match /ubio/i
@@ -309,11 +308,12 @@ describe "Species page without login" do
       page.open "/register"
       page.type "user_username", "jrice"
       page.body_text.should_not match(/jrice is already taken/i)
-      page.focus "user_entered_password"
+      page.focus("user_entered_password")
+      sleep 1 #it sucks, did not get a better idea
       page.dom(:reload => true)
       page.body_text.should match(/jrice is already taken/i)
       # page.body_text.should_not match(/show clade browser/i)
-      # page.click "curator_request", :wait_for => :ajax
+      # page.click "curator_request", :wait_for => :ajax, :javascript_framework => :jquery
       # pp get_dom(page)
     end
   end
