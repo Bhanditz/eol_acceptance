@@ -39,11 +39,16 @@ Sometimes it is beneficial to run server on a remote machine -- for example you 
 The easiest way is to do it using a virtual machine (VMWare for example)
 
 * Install eol_acceptance on your virtual machine (you need java and selenium-client gem on it)
+* Run 'rake selenium:start' on the REMOTE machine
 * You do NOT need to configure remote config_private.yml file
 * Set you local config_private file as following:
 
     host: IP_TO_YOUR_REMOTE_VM
-    url: "http://localhost:3000" #or any other url you want to test
+    url: "http://www.eol.org" #or any other url you want to test
     browser: "*firefox"
     curator: curator_name
-    curator_password: secret_password
+    curator_password: secret_passwor
+
+Now you should be able to run tests on your local machine using the browser on the remote machine
+
+Please note -- if your url is "http://localhost:3000" you also have to run eol application on the remote machine.
