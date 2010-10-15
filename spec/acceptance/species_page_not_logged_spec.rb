@@ -185,7 +185,7 @@ describe "Species page without login" do
   it 'should require users to be logged in to add comments' do
     page.open Conf.corn_page
     page.body_text.should_not match(/You must be logged in to post comments/i)
-    page.click("large-image-comment-button-popup-link")
+    page.click("large-image-comment-button-popup-link", :wait_for => :ajax, :javascript_framework => :jquery)
     page.dom(:reload => true)
     page.body_text.should match(/You must be logged in to post comments/i)
   end
@@ -193,7 +193,7 @@ describe "Species page without login" do
   it 'should require users to be logged in to add tags' do
     page.open Conf.corn_page
     page.body_text.should_not match(/You must be logged in to add your own tags/i)
-    page.click("large-image-tagging-button-popup-link")
+    page.click("large-image-tagging-button-popup-link", :wait_for => :ajax, :javascript_framework => :jquery)
     page.dom(:reload => true)
     page.body_text.should match(/You must be logged in to add your own tags/i)
   end
